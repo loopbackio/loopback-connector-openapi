@@ -1,6 +1,6 @@
 {
   "name": "loopback-connector-openapi",
-  "version": "3.2.1",
+  "version": "4.0.0",
   "description": "Connect Loopback to a OpenAPI-compliant APIs",
   "engines": {
     "node": ">=8.9"
@@ -9,7 +9,7 @@
   "scripts": {
     "pretest": "cd test/fixtures/lb4-ping-app && npm i && npm run build",
     "lint": "eslint .",
-    "test": "mocha --opts test/mocha.opts",
+    "test": "mocha",
     "posttest": "npm run lint"
   },
   "dependencies": {
@@ -22,7 +22,8 @@
     "eslint": "^5.14.1",
     "eslint-config-loopback": "^13.0.0",
     "loopback": "^3.25.0",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.2",
+    "p-event": "^3.0.0",
     "should": "^11.1.2"
   },
   "repository": {

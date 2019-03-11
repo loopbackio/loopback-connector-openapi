@@ -8,6 +8,8 @@
 const assert = require('assert');
 const should = require('should');
 const loopback = require('loopback');
+const pkgVersion = require('../package.json').version;
+const pEvent = require('p-event');
 
 describe('swagger connector for OpenApi 3.0', () => {
   let lb4App;
@@ -17,73 +19,55 @@ describe('swagger connector for OpenApi 3.0', () => {
   after(stopLB4App);
 
   describe('OpenAPI spec validation against OpenAPI 3.0 specification', () => {
-    it('when opted validates openapi spec: invalid spec', function(done) {
-      const dsErrorProne = createDataSource(
-        {openapi: '3.0.0'},
-        {validate: false},
-      );
-      dsErrorProne.on('error', function(err) {
-        should.exist(err);
-        done();
-      });
+    it('when opted validates openapi spec: invalid spec', async () => {
+      try {
+        await createDataSource(
+          {openapi: '3.0.0'},
+          {validate: false},
+        );
+      } catch (err) {
+        should.exists(err);
+      }
     });
 
-    it('when opted validates openapi spec: valid spec', function(done) {
-      const ds = createDataSource(specUrl);
-      ds.on('connected', () => {
-        ds.connector.should.have.property('client');
-        ds.connector.client.should.have.property('apis');
-        done();
-      });
+    it('when opted validates openapi spec: valid spec', async () => {
+      const ds = await createDataSource(specUrl);
+      ds.connector.should.have.property('client');
+      ds.connector.client.should.have.property('apis');
     });
   });
 
   describe('openapi client generation', () => {
-    it('generates client from openapi spec url', function(done) {
-      const ds = createDataSource(specUrl);
-      ds.on('connected', () => {
-        ds.connector.should.have.property('client');
-        ds.connector.client.should.have.property('apis');
-        done();
-      });
+    it('generates client from openapi spec url', async () => {
+      const ds = await createDataSource(specUrl);
+      ds.connector.should.have.property('client');
+      ds.connector.client.should.have.property('apis');
     });
 
-    it('generates client from local openapi spec - .json file', function(done) {
-      const ds = createDataSource('test/fixtures/3.0/ping.json');
-      ds.on('connected', () => {
-        ds.connector.should.have.property('client');
-        ds.connector.client.should.have.property('apis');
-        done();
-      });
+    it('generates client from local openapi spec - .json file', async () => {
+      const ds = await createDataSource('test/fixtures/3.0/ping.json');
+      ds.connector.should.have.property('client');
+      ds.connector.client.should.have.property('apis');
     });
 
-    it('generates client from local openapi spec - .yaml file', function(done) {
-      const ds = createDataSource('test/fixtures/3.0/ping.yaml');
-      ds.on('connected', () => {
-        ds.connector.should.have.property('client');
-        ds.connector.client.should.have.property('apis');
-        done();
-      });
+    it('generates client from local openapi spec - .yaml file', async () => {
+      const ds = await createDataSource('test/fixtures/3.0/ping.yaml');
+      ds.connector.should.have.property('client');
+      ds.connector.client.should.have.property('apis');
     });
 
-    it('generates client from openapi spec object', function(done) {
-      const ds = createDataSource(require('./fixtures/3.0/ping.json'));
-      ds.on('connected', () => {
-        ds.connector.should.have.property('client');
-        ds.connector.client.should.have.property('apis');
-        done();
-      });
+    it('generates client from openapi spec object', async () => {
+      const ds = await createDataSource(require('./fixtures/3.0/ping.json'));
+      ds.connector.should.have.property('client');
+      ds.connector.client.should.have.property('apis');
     });
   });
 
   describe('models', () => {
     describe('models without remotingEnabled', () => {
       let ds;
-      before(function(done) {
-        ds = createDataSource(specUrl);
-        ds.on('connected', () => {
-          done();
-        });
+      before(async () => {
+        ds = await createDataSource(specUrl);
       });
 
       it('creates models', function(done) {
@@ -110,27 +94,20 @@ describe('swagger connector for OpenApi 3.0', () => {
       });
     });
 
-    it('allows models to be attached before the spec is loaded', done => {
-      const ds = createDataSource('test/fixtures/3.0/ping.json');
+    it('allows models to be attached before the spec is loaded', async () => {
+      const ds = await createDataSource('test/fixtures/3.0/ping.json');
       const PingService = ds.createModel('PingService', {});
-
-      ds.once('connected', () => {
-        should(Object.keys(PingService)).containEql('get_ping');
-        should(typeof PingService.get_ping).eql('function');
-        done();
-      });
+      should(Object.keys(PingService)).containEql('get_ping');
+      should(typeof PingService.get_ping).eql('function');
     });
   });
 
   describe('Swagger invocations', () => {
     let ds, PingService;
 
-    before(function(done) {
-      ds = createDataSource(specUrl);
-      ds.on('connected', () => {
-        PingService = ds.createModel('PingService', {});
-        done();
-      });
+    before(async () => {
+      ds = await createDataSource(specUrl);
+      PingService = ds.createModel('PingService', {});
     });
 
     it('invokes the PingService', async () => {
@@ -141,7 +118,7 @@ describe('swagger connector for OpenApi 3.0', () => {
         url: '/ping',
       });
       res.body.headers.should.containEql({
-        'user-agent': 'loopback-connector-openapi/3.2.1',
+        'user-agent': 'loopback-connector-openapi/' + pkgVersion,
       });
     });
 
@@ -221,7 +198,7 @@ describe('swagger connector for OpenApi 3.0', () => {
   }
 });
 
-function createDataSource(spec, options) {
+async function createDataSource(spec, options) {
   const config = Object.assign(
     {
       connector: require('../index'),
@@ -229,5 +206,7 @@ function createDataSource(spec, options) {
     },
     options,
   );
-  return loopback.createDataSource('openapi', config);
+  const ds = loopback.createDataSource('openapi', config);
+  await pEvent(ds, 'connected');
+  return ds;
 }
