@@ -1,5 +1,5 @@
 // Copyright IBM Corp. 2016,2019. All Rights Reserved.
-// Node module: loopback-connector-swagger
+// Node module: loopback-connector-openapi
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
@@ -16,7 +16,7 @@ describe('swagger connector for OpenApi 3.0', () => {
   before(startLB4App);
   after(stopLB4App);
 
-  describe('openapi spec validation against Swagger 3.0 specification', () => {
+  describe('OpenAPI spec validation against OpenAPI 3.0 specification', () => {
     it('when opted validates openapi spec: invalid spec', function(done) {
       const dsErrorProne = createDataSource(
         {openapi: '3.0.0'},
@@ -141,7 +141,7 @@ describe('swagger connector for OpenApi 3.0', () => {
         url: '/ping',
       });
       res.body.headers.should.containEql({
-        'user-agent': 'loopback-connector-swagger/3.2.1',
+        'user-agent': 'loopback-connector-openapi/3.2.1',
       });
     });
 

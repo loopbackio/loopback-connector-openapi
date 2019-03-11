@@ -1,5 +1,5 @@
 // Copyright IBM Corp. 2016,2019. All Rights Reserved.
-// Node module: loopback-connector-swagger
+// Node module: loopback-connector-openapi
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
@@ -9,7 +9,7 @@ const assert = require('assert');
 const should = require('should');
 const loopback = require('loopback');
 
-describe('swagger connector', function() {
+describe('OpenAPI connector', function() {
   describe('swagger spec validation against Swagger 2.0 specification', function() {
     it('when opted validates swagger spec: invalid spec', function(done) {
       const dsErrorProne = createDataSource(

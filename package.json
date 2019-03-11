@@ -1,7 +1,7 @@
 {
-  "name": "loopback-connector-swagger",
+  "name": "loopback-connector-openapi",
   "version": "3.2.1",
-  "description": "Connect Loopback to a Swagger-compliant API",
+  "description": "Connect Loopback to a OpenAPI-compliant APIs",
   "engines": {
     "node": ">=8.9"
   },
@@ -19,7 +19,6 @@
     "swagger-parser": "^6.0.5"
   },
   "devDependencies": {
-    "bluebird": "^3.5.3",
     "eslint": "^5.14.1",
     "eslint-config-loopback": "^13.0.0",
     "loopback": "^3.25.0",
@@ -28,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strongloop/loopback-connector-swagger.git"
+    "url": "https://github.com/strongloop/loopback-connector-openapi.git"
   },
   "copyright.owner": "IBM Corp.",
   "license": "MIT"

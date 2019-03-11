@@ -1,4 +1,4 @@
-# loopback-connector-swagger
+# loopback-connector-openapi
 
 The Swagger connector enables LoopBack applications to interact with other REST APIs described by the [OpenAPI (Swagger) Specification v2.0](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md) or [OpenAPI (Swagger) Specification v3.0](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md).
 
@@ -9,7 +9,7 @@ We use [Swagger Client](https://github.com/swagger-api/swagger-js) and [Swagger 
 In your application root directory, enter:
 
 ```
-$ npm install loopback-connector-swagger --save
+$ npm install loopback-connector-openapi --save
 ```
 
 This will install the module from npm and add it as a dependency to the application's `package.json` file.
@@ -22,7 +22,7 @@ With code:
 
 ```js
 var ds = loopback.createDataSource('swagger', {
-  connector: 'loopback-connector-swagger',
+  connector: 'loopback-connector-openapi',
   spec: 'http://petstore.swagger.io/v2/swagger.json',
 });
 ```
@@ -49,7 +49,7 @@ Specify the options for the data source with the following properties.
 
 | Property       | Description                                                                                                                                                                       | Default |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| connector      | Must be `'loopback-connector-swagger'` to specify Swagger connector                                                                                                               | None    |
+| connector      | Must be `'loopback-connector-openapi'` to specify Swagger connector                                                                                                               | None    |
 | spec           | HTTP URL or path to the Swagger specification file (with file name extension `.yaml/.yml` or `.json`). File path must be relative to current working directory (`process.cwd()`). | None    |
 | validate       | When `true`, validates provided `spec` against Swagger specification 2.0 before initializing a data source.                                                                       | `false` |
 | authorizations | Security configuration for making authenticated requests to the API.                                                                                                              |         |
@@ -174,7 +174,7 @@ loopback.remoteMethod(PetService.searchPet, {
 
 ### Caching
 
-As an experimental feature, loopback-connector-swagger is able to cache the result of `GET` requests.
+As an experimental feature, loopback-connector-openapi is able to cache the result of `GET` requests.
 
 **Important: we support only one cache invalidation mechanism - expiration based on a static TTL value.**
 
@@ -235,7 +235,7 @@ The connector can be observed for `before execute` and `after execute` events. F
 
 ```js
 const ds = loopback.createDataSource('swagger', {
-    connector: 'loopback-connector-swagger',
+    connector: 'loopback-connector-openapi',
     spec: spec,
     authorizations: authz || {},
   });
