@@ -9,7 +9,7 @@ const assert = require('assert');
 const should = require('should');
 const loopback = require('loopback');
 
-describe('OpenAPI connector', function() {
+describe('OpenAPI connector for Swagger 2.0', function() {
   describe('swagger spec validation against Swagger 2.0 specification', function() {
     it('when opted validates swagger spec: invalid spec', function(done) {
       const dsErrorProne = createDataSource(
@@ -102,28 +102,6 @@ describe('OpenAPI connector', function() {
           res.should.have.property('status', 200);
           done();
         }, /* on error */ done);
-      });
-    });
-
-    // out of scope of initial release
-    describe.skip('models with remotingEnabled', function() {
-      let ds;
-      before(function(done) {
-        ds = createDataSource('test/fixtures/2.0/petstore.json', {
-          remotingEnabled: true,
-        });
-        ds.on('connected', function() {
-          done();
-        });
-      });
-
-      it('creates models', function(done) {
-        const PetService = ds.createModel('PetService', {});
-        (typeof PetService.getPetById).should.eql('function');
-        PetService.getPetById.shared.should.equal(true);
-        (typeof PetService.addPet).should.eql('function');
-        PetService.addPet.shared.should.equal(true);
-        done();
       });
     });
 

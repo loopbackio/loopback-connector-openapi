@@ -21,10 +21,7 @@ describe('swagger connector for OpenApi 3.0', () => {
   describe('OpenAPI spec validation against OpenAPI 3.0 specification', () => {
     it('when opted validates openapi spec: invalid spec', async () => {
       try {
-        await createDataSource(
-          {openapi: '3.0.0'},
-          {validate: false},
-        );
+        await createDataSource({openapi: '3.0.0'}, {validate: false});
       } catch (err) {
         should.exists(err);
       }
@@ -64,118 +61,101 @@ describe('swagger connector for OpenApi 3.0', () => {
   });
 
   describe('models', () => {
-    describe('models without remotingEnabled', () => {
-      let ds;
-      before(async () => {
-        ds = await createDataSource(specUrl);
-      });
+    let ds, Todo;
 
-      it('creates models', function(done) {
-        const PingService = ds.createModel('PingService', {});
-        (typeof PingService.get_ping).should.eql('function');
+    before(async () => {
+      ds = await createDataSource(specUrl);
+      Todo = ds.createModel('Todo', {}, {base: 'Model'});
+    });
+
+    it('creates models', function(done) {
+      (typeof Todo.TodoController_findTodos).should.eql('function');
+      done();
+    });
+
+    it('supports model methods', function(done) {
+      Todo.TodoController_findTodos({}, function(err, res) {
+        if (err) return done(err);
+        res.status.should.eql(200);
         done();
       });
+    });
 
-      it('supports model methods', function(done) {
-        const PingService = ds.createModel('PingService', {});
-        PingService.get_ping({}, function(err, res) {
-          if (err) return done(err);
-          res.status.should.eql(200);
-          done();
-        });
-      });
-
-      it('supports model methods returning a Promise', done => {
-        const PingService = ds.createModel('PingService', {});
-        PingService.get_ping({}).then(function onSuccess(res) {
-          res.should.have.property('status', 200);
-          done();
-        }, /* on error */ done);
-      });
+    it('supports model methods returning a Promise', done => {
+      Todo.TodoController_findTodos({}).then(function onSuccess(res) {
+        res.should.have.property('status', 200);
+        done();
+      }, /* on error */ done);
     });
 
     it('allows models to be attached before the spec is loaded', async () => {
       const ds = await createDataSource('test/fixtures/3.0/ping.json');
-      const PingService = ds.createModel('PingService', {});
-      should(Object.keys(PingService)).containEql('get_ping');
-      should(typeof PingService.get_ping).eql('function');
-    });
-  });
-
-  describe('Swagger invocations', () => {
-    let ds, PingService;
-
-    before(async () => {
-      ds = await createDataSource(specUrl);
-      PingService = ds.createModel('PingService', {});
+      const Ping = ds.createModel('Ping', {});
+      should(Object.keys(Ping)).containEql('get_ping');
+      should(typeof Ping.get_ping).eql('function');
     });
 
-    it('invokes the PingService', async () => {
-      const res = await PingService.get_ping({});
-      res.status.should.eql(200);
-      res.body.should.containEql({
-        greeting: 'Hello from LoopBack',
-        url: '/ping',
-      });
-      res.body.headers.should.containEql({
-        'user-agent': 'loopback-connector-openapi/' + pkgVersion,
-      });
-    });
-
-    it('invokes the GreetService', async () => {
-      const res = await PingService.post_greet(
-        {
-          name: 'John',
-        },
-        {
-          requestBody: {
-            requestId: '001',
+    describe('Swagger invocations', () => {
+      it('invokes the createTodo', async () => {
+        const res = await Todo.TodoController_createTodo(
+          {},
+          {
+            requestBody: {
+              title: 'My todo',
+            },
           },
-        },
-      );
+        );
 
-      res.status.should.eql(200);
-      res.body.should.eql({hello: 'John', requestId: '001'});
-    });
-
-    it('invokes connector-hooks', async () => {
-      const events = [];
-      const connector = ds.connector;
-      connector.observe('before execute', function(ctx, next) {
-        assert(ctx.req);
-        events.push('before execute');
-        next();
-      });
-      connector.observe('after execute', function(ctx, next) {
-        assert(ctx.res);
-        events.push('after execute');
-        next();
-      });
-      await PingService.get_ping({});
-      assert.deepEqual(events, ['before execute', 'after execute']);
-    });
-
-    it('supports Promise-based connector-hooks', async () => {
-      const events = [];
-      const connector = ds.connector;
-
-      connector.observe('before execute', ctx => {
-        events.push('before execute');
-        return Promise.resolve();
+        res.status.should.eql(200);
+        res.body.should.eql({id: 1, title: 'My todo'});
       });
 
-      connector.observe('after execute', ctx => {
-        events.push('after execute');
-        return Promise.resolve();
+      it('invokes the findTodos', async () => {
+        const res = await Todo.TodoController_findTodos({});
+        res.status.should.eql(200);
+        res.body.should.eql([{id: 1, title: 'My todo'}]);
       });
 
-      await PingService.get_ping({});
-      assert.deepEqual(events, ['before execute', 'after execute']);
+      it('invokes connector-hooks', async () => {
+        const events = [];
+        const connector = ds.connector;
+        connector.observe('before execute', function(ctx, next) {
+          assert(ctx.req);
+          events.push('before execute');
+          next();
+        });
+        connector.observe('after execute', function(ctx, next) {
+          assert(ctx.res);
+          events.push('after execute');
+          next();
+        });
+        await Todo.TodoController_findTodos({});
+        assert.deepEqual(events, ['before execute', 'after execute']);
+      });
+
+      it('supports Promise-based connector-hooks', async () => {
+        const events = [];
+        const connector = ds.connector;
+
+        connector.observe('before execute', ctx => {
+          events.push('before execute');
+          return Promise.resolve();
+        });
+
+        connector.observe('after execute', ctx => {
+          events.push('after execute');
+          return Promise.resolve();
+        });
+
+        await Todo.TodoController_findTodos({});
+        assert.deepEqual(events, ['before execute', 'after execute']);
+      });
     });
   });
 
   async function startLB4App() {
-    const pingApp = require('./fixtures/lb4-ping-app/index.js');
+    const TodoListApplication = require('@loopback/example-todo')
+      .TodoListApplication;
     const config = {
       rest: {
         port: 0,
@@ -186,9 +166,11 @@ describe('swagger connector for OpenApi 3.0', () => {
         },
       },
     };
-    lb4App = await pingApp.main(config);
-    specUrl = `${lb4App.restServer.url}/openapi.json`;
-    console.log(lb4App.restServer.url);
+    lb4App = new TodoListApplication(config);
+    lb4App.bind('datasources.config.db').to({connector: 'memory'});
+    await lb4App.boot();
+    await lb4App.start();
+    specUrl = lb4App.restServer.url + '/openapi.json';
   }
 
   async function stopLB4App() {

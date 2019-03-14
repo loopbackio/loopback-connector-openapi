@@ -7,7 +7,6 @@
   },
   "main": "index.js",
   "scripts": {
-    "pretest": "cd test/fixtures/lb4-ping-app && npm i && npm run build",
     "lint": "eslint .",
     "test": "mocha",
     "posttest": "npm run lint"
@@ -19,11 +18,12 @@
     "swagger-parser": "^6.0.5"
   },
   "devDependencies": {
+    "@loopback/example-todo": "^1.5.1",
     "eslint": "^5.14.1",
     "eslint-config-loopback": "^13.0.0",
     "loopback": "^3.25.0",
     "mocha": "^6.0.2",
-    "p-event": "^3.0.0",
+    "p-event": "^4.0.0",
     "should": "^11.1.2"
   },
   "repository": {
