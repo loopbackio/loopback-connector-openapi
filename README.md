@@ -53,6 +53,7 @@ Specify the options for the data source with the following properties.
 | spec           | HTTP URL or path to the Swagger specification file (with file name extension `.yaml/.yml` or `.json`). File path must be relative to current working directory (`process.cwd()`). | None    |
 | validate       | When `true`, validates provided `spec` against Swagger specification 2.0 before initializing a data source.                                                                       | `false` |
 | authorizations | Security configuration for making authenticated requests to the API.                                                                                                              |         |
+| positional     | Use positional parameters instead of named parameters                                                                                                                             | `false` |
 
 ### Authentication
 
@@ -145,6 +146,29 @@ For example:
 for above operation, the resulting method name will be: `get_weather_forecast`.
 
 This means you can call `MyModel.get_weather_forecast()` to access this endpoint programmatically.
+
+### Named parameters vs. positional parameters
+
+The `positional` setting allows a method to be invoked with positional parameters based on the
+parameters/requestBody of the OpenAPI operation spec.
+
+```js
+const result = await MyModel.my_operation('94555', {});
+});
+```
+
+Without `positional` set to `true`, named parameters are expected:
+
+```js
+const result = await MyModel.my_operation({
+  {
+    zipCode: '94555',
+  },
+  {
+    requestBody: {}
+  }
+});
+```
 
 ### Extend a model to wrap/mediate API Operations
 
@@ -245,4 +269,4 @@ const ds = loopback.createDataSource('swagger', {
     });
     ...
   });
-```    
+```
