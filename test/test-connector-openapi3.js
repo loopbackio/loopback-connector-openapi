@@ -8,7 +8,6 @@
 const assert = require('assert');
 const should = require('should');
 const loopback = require('loopback');
-const pkgVersion = require('../package.json').version;
 const pEvent = require('p-event');
 
 describe('swagger connector for OpenApi 3.0', () => {
@@ -19,15 +18,14 @@ describe('swagger connector for OpenApi 3.0', () => {
   after(stopLB4App);
 
   describe('OpenAPI spec validation against OpenAPI 3.0 specification', () => {
-    it('when opted validates openapi spec: invalid spec', async () => {
-      try {
-        await createDataSource({openapi: '3.0.0'}, {validate: false});
-      } catch (err) {
-        should.exists(err);
-      }
+    it('reports error if required settings are missing', async () => {
+      await createDataSource(
+        {openapi: '3.0.0'},
+        {validate: false},
+      ).should.be.rejected();
     });
 
-    it('when opted validates openapi spec: valid spec', async () => {
+    it('creates `client.apis` upon datasource creation', async () => {
       const ds = await createDataSource(specUrl);
       ds.connector.should.have.property('client');
       ds.connector.client.should.have.property('apis');
@@ -188,9 +186,8 @@ describe('swagger connector for OpenApi 3.0', () => {
   }
 
   async function stopLB4App() {
-    if (lb4App) {
-      await lb4App.stop();
-    }
+    if (!lb4App) return;
+    await lb4App.stop();
   }
 });
 
