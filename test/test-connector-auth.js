@@ -1,107 +1,93 @@
-// Copyright IBM Corp. 2016,2018. All Rights Reserved.
-// Node module: loopback-connector-swagger
+// Copyright IBM Corp. 2016,2019. All Rights Reserved.
+// Node module: loopback-connector-openapi
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
 'use strict';
 
-var assert = require('assert');
-var should = require('should');
-var loopback = require('loopback');
+/* eslint-disable camelcase */
 
-describe('Swagger connector - security', function() {
-  var url = 'http://petstore.swagger.io/v2/pet/';
+require('should');
+const loopback = require('loopback');
+const pEvent = require('p-event');
+
+describe('OpenAPI connector - security', () => {
+  const url = 'http://petstore.swagger.io/v2/pet/';
 
   describe('Basic auth', function() {
-    it('supports basic auth', function(done) {
-      var ds = createDataSource('test/fixtures/petStore.json', {
-        type: 'basic',
-        username: 'aaabbbccc',
-        password: 'header',
+    it('supports basic auth', async () => {
+      const req = await getPetByIdRequest({
+        basic: {
+          username: 'aaabbbccc',
+          password: 'header',
+        },
       });
-      ds.on('connected', function() {
-        var PetService = ds.createModel('PetService', {});
-        // with mock:true, swagger-client sends the req object it uses to make
-        // http calls and stops processing request further
-        var req = PetService.getPetById({petId: 1}, {mock: true});
-        var auth = req.headers.Authorization.split(' ');
-        req.headers.should.have.property('Authorization');
-        auth[0].should.equal('Basic');
-        done();
-      });
+
+      const auth = req.headers.authorization.split(' ');
+      req.headers.should.have.property('authorization');
+      auth[0].should.equal('Basic');
     });
   });
 
-  describe('apiKey auth', function() {
-    it('supports apiKey - in query', function(done) {
-      var ds = createDataSource('test/fixtures/petStore.json', {
-        type: 'apiKey',
-        name: 'api_key',
-        key: 'abc12',
-        in: 'query',
+  describe('apiKey auth', () => {
+    it('supports apiKey - in query', async () => {
+      const req = await getPetByIdRequest({
+        api_key_query: 'abc12',
       });
-      ds.on('connected', function() {
-        var PetService = ds.createModel('PetService', {});
-        var req = PetService.getPetById({petId: 1}, {mock: true});
-        req.url.should.equal(url + '1?api_key=abc12');
-        done();
-      });
+      req.url.should.equal(url + '1?api_key=abc12');
     });
 
-    it('supports apiKey - in header', function(done) {
-      var ds = createDataSource('test/fixtures/petStore.json', {
-        type: 'apiKey',
-        name: 'api_key',
-        key: 'abc12',
-        in: 'header',
+    it('supports apiKey - in header', async () => {
+      const req = await getPetByIdRequest({
+        api_key: 'abc12',
       });
-      ds.on('connected', function() {
-        var PetService = ds.createModel('PetService', {});
-        var req = PetService.getPetById({petId: 1}, {mock: true});
-        req.url.should.equal(url + '1');
-        req.headers.api_key.should.equal('abc12');
-        done();
-      });
+      req.url.should.equal(url + '1');
+      req.headers.api_key.should.equal('abc12');
     });
   });
 
-  describe('oAuth2', function() {
-    it('supports oauth2 - in header by default', function(done) {
-      var ds = createDataSource('test/fixtures/petStore.json', {
-        name: 'petstore_auth',
-        type: 'oauth2',
-        accessToken: 'abc123abc',
+  describe('oAuth2', () => {
+    it('supports oauth2 - in header', async () => {
+      const req = await getPetByIdRequest({
+        petstore_auth: {
+          token: {
+            access_token: 'abc123abc',
+          },
+        },
       });
-      ds.on('connected', function() {
-        var PetService = ds.createModel('PetService', {});
-        var req = PetService.addPet({body: {name: 'topa'}}, {mock: true});
-        req.headers.should.have.property('Authorization');
-        req.headers.Authorization.should.equal('Bearer abc123abc');
-        done();
-      });
+      req.headers.should.have.property('authorization');
+      req.headers.authorization.should.equal('Bearer abc123abc');
     });
 
-    it('supports oauth2 - in query', function(done) {
-      var ds = createDataSource('test/fixtures/petStore.json', {
-        name: 'x-auth', // custom extension to securityDefinition obj
-        type: 'oauth2',
-        accessToken: 'abc123abc',
-        in: 'query',
+    it('supports oauth2 with token_type', async () => {
+      const req = await getPetByIdRequest({
+        'x-auth': {
+          token: {
+            access_token: 'abc123abc',
+            token_type: 'JWT',
+          },
+        },
       });
-      ds.on('connected', function() {
-        var PetService = ds.createModel('PetService', {});
-        var req = PetService.getPetById({petId: 1}, {mock: true});
-        req.url.should.equal(url + '1?access_token=abc123abc');
-        done();
-      });
+      req.headers.should.have.property('authorization');
+      req.headers.authorization.should.equal('JWT abc123abc');
     });
   });
 });
 
-function createDataSource(spec, authz) {
-  return loopback.createDataSource('swagger', {
+async function getPetByIdRequest(authz) {
+  const ds = loopback.createDataSource('swagger', {
     connector: require('../index'),
-    spec: spec,
-    security: authz,
+    spec: 'test/fixtures/2.0/petstore.json',
+    authorizations: authz || {},
+  });
+  await pEvent(ds, 'connected');
+
+  return new Promise(resolve => {
+    ds.connector.observe('before execute', (ctx, next) => {
+      resolve(ctx.req);
+    });
+
+    const PetService = ds.createModel('PetService', {});
+    PetService.getPetById({petId: 1});
   });
 }
