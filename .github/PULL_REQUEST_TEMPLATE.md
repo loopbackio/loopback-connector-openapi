@@ -1,24 +1,18 @@
-### Description
-
-
-#### Related issues
-
 <!--
-Please use the following link syntaxes:
+Please provide a high-level description of the changes made by your pull request.
 
-- #49 (to reference issues in the current repository)
-- strongloop/loopback#49 (to reference issues in another repository)
+Include references to all related GitHub issues and other pull requests, for example:
+
+Fixes #123
+Implements #254
+See also #23
 -->
 
-- None
+## Checklist
 
-### Checklist
+👉 [Read and sign the CLA (Contributor License Agreement)](https://cla.strongloop.com/agreements/strongloop/loopback-connector-openapi) 👈
 
-<!--
-Please mark your choice with an "x" (i.e. [x], see
-https://github.com/blog/1375-task-lists-in-gfm-issues-pulls-comments)
--->
-
+- [ ] `npm test` passes on your machine
 - [ ] New tests added or existing tests modified to cover all changes
-- [ ] Code conforms with the [style
-  guide](http://loopback.io/doc/en/contrib/style-guide.html)
+- [ ] Code conforms with the [style guide](https://loopback.io/doc/en/contrib/style-guide-es6.html)
+- [ ] Commit messages are following our [guidelines](https://loopback.io/doc/en/contrib/git-commit-messages.html)
