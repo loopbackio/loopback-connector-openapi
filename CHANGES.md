@@ -1,3 +1,13 @@
+2020-03-27, Version 4.0.2
+=========================
+
+ * Fixes https://github.com/strongloop/loopback-next/issues/4553 (#7) (Raymond Feng)
+
+ * chore: improve issue and PR templates (#6) (Nora)
+
+ * add node 12 to CI (#4) (Nora)
+
+
 2019-04-12, Version 4.0.1
 =========================
 
