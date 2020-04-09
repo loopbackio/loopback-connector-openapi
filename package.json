@@ -3,7 +3,7 @@
   "version": "4.0.2",
   "description": "Connect Loopback to a OpenAPI-compliant APIs",
   "engines": {
-    "node": ">=8.9"
+    "node": ">=10"
   },
   "main": "index.js",
   "scripts": {
