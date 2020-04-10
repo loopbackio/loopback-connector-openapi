@@ -60,6 +60,20 @@ describe('swagger connector for OpenApi 3.0', () => {
 
   describe('models', () => {
     let ds, Todo;
+    /*
+     * Undefined filter crashes swagger-client 9.x
+     * { filter: undefined } filter
+     * at node_modules/swagger-client/dist/index.js:711:13
+     * at Array.reduce (<anonymous>)
+     * at encodeFormOrQuery (node_modules/swagger-client/dist/index.js:707:43)
+     * at mergeInQueryOrForm (node_modules/swagger-client/dist/index.js:764:39)
+     * at Object.buildRequest (node_modules/swagger-client/dist/index.js:3945:3)
+     * at Function.execute (node_modules/swagger-client/dist/index.js:3760:30)
+     * at Swagger.execute (node_modules/swagger-client/dist/index.js:4114:20)
+     * at node_modules/swagger-client/dist/index.js:2843:24
+     * at Object.<anonymous> (lib/openapi-connector.js:221:14)
+     */
+    const filter = {};
 
     before(async () => {
       ds = await createDataSource(specUrl);
@@ -72,7 +86,7 @@ describe('swagger connector for OpenApi 3.0', () => {
     });
 
     it('supports model methods', function(done) {
-      Todo.TodoController_findTodos({}, function(err, res) {
+      Todo.TodoController_findTodos({filter}, function(err, res) {
         if (err) return done(err);
         res.status.should.eql(200);
         done();
@@ -80,7 +94,7 @@ describe('swagger connector for OpenApi 3.0', () => {
     });
 
     it('supports model methods returning a Promise', done => {
-      Todo.TodoController_findTodos({}).then(function onSuccess(res) {
+      Todo.TodoController_findTodos({filter}).then(function onSuccess(res) {
         res.should.have.property('status', 200);
         done();
       }, /* on error */ done);
@@ -120,7 +134,7 @@ describe('swagger connector for OpenApi 3.0', () => {
       });
 
       it('invokes the findTodos', async () => {
-        const res = await Todo.TodoController_findTodos({});
+        const res = await Todo.TodoController_findTodos({filter});
         res.status.should.eql(200);
         res.body.should.eql([
           {id: 1, title: 'My todo'},
@@ -141,7 +155,7 @@ describe('swagger connector for OpenApi 3.0', () => {
           events.push('after execute');
           next();
         });
-        await Todo.TodoController_findTodos({});
+        await Todo.TodoController_findTodos({filter});
         assert.deepEqual(events, ['before execute', 'after execute']);
       });
 
@@ -159,7 +173,7 @@ describe('swagger connector for OpenApi 3.0', () => {
           return Promise.resolve();
         });
 
-        await Todo.TodoController_findTodos({});
+        await Todo.TodoController_findTodos({filter});
         assert.deepEqual(events, ['before execute', 'after execute']);
       });
     });

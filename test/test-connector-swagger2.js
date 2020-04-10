@@ -63,20 +63,23 @@ describe('OpenAPI connector for Swagger 2.0', function() {
 
   describe('models', function() {
     describe('models without remotingEnabled', function() {
-      let ds;
+      let ds, PetService, petId;
       before(async () => {
         ds = await createDataSource('test/fixtures/2.0/petstore.json');
+        PetService = ds.createModel('PetService', {});
+        const data = await PetService.findPetsByStatus({status: 'available'});
+        should(data.body).be.Array();
+        should(data.body.length).be.above(0);
+        petId = data.body[0].id;
       });
 
       it('creates models', () => {
-        const PetService = ds.createModel('PetService', {});
         (typeof PetService.getPetById).should.eql('function');
         (typeof PetService.addPet).should.eql('function');
       });
 
       it('supports model methods with callback', done => {
-        const PetService = ds.createModel('PetService', {});
-        PetService.getPetById({petId: 1}, function(err, res) {
+        PetService.getPetById({petId}, function(err, res) {
           if (err) return done(err);
           res.status.should.eql(200);
           done();
@@ -84,8 +87,7 @@ describe('OpenAPI connector for Swagger 2.0', function() {
       });
 
       it('supports model methods returning a Promise', async () => {
-        const PetService = ds.createModel('PetService', {});
-        const res = await PetService.getPetById({petId: 1});
+        const res = await PetService.getPetById({petId});
         res.should.have.property('status', 200);
       });
     });
@@ -101,20 +103,27 @@ describe('OpenAPI connector for Swagger 2.0', function() {
 
   describe('Swagger invocations', function() {
     let ds, PetService;
+    let petId = 1;
 
     before(async () => {
       ds = await createDataSource('test/fixtures/2.0/petstore.json');
       PetService = ds.createModel('PetService', {});
+
+      // https://petstore.swagger.io/v2/pet/findByStatus?status=available
+      const data = await PetService.findPetsByStatus({status: 'available'});
+      should(data.body).be.Array();
+      should(data.body.length).be.above(0);
+      petId = data.body[0].id;
     });
 
     it('invokes the PetService', async () => {
-      const res = await PetService.getPetById({petId: 1});
+      const res = await PetService.getPetById({petId});
       res.status.should.eql(200);
     });
 
     it('supports a request for xml content', async () => {
       const res = await PetService.getPetById(
-        {petId: 1},
+        {petId},
         {responseContentType: 'application/xml'},
       );
 
@@ -135,7 +144,7 @@ describe('OpenAPI connector for Swagger 2.0', function() {
         events.push('after execute');
         next();
       });
-      PetService.getPetById({petId: 1}, function(err, response) {
+      PetService.getPetById({petId}, function(err, response) {
         assert.deepEqual(events, ['before execute', 'after execute']);
         done();
       });
@@ -155,7 +164,7 @@ describe('OpenAPI connector for Swagger 2.0', function() {
         return Promise.resolve();
       });
 
-      PetService.getPetById({petId: 1}, function(err, response) {
+      PetService.getPetById({petId}, function(err, response) {
         assert.deepEqual(events, ['before execute', 'after execute']);
         done();
       });
