@@ -1,3 +1,11 @@
+2020-04-12, Version 5.0.0
+=========================
+
+ * update README with LB4 usage (#8) (Diana Lau)
+
+ * Fix CI failures (#9) (Raymond Feng)
+
+
 2020-03-27, Version 4.0.2
 =========================
 
