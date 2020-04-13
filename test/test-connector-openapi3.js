@@ -100,6 +100,20 @@ describe('swagger connector for OpenApi 3.0', () => {
       }, /* on error */ done);
     });
 
+    it('supports model methods by x-operation-name', done => {
+      Todo.findTodos({filter}).then(function onSuccess(res) {
+        res.should.have.property('status', 200);
+        done();
+      }, /* on error */ done);
+    });
+
+    it('exports apis by tag', done => {
+      Todo.apis.TodoController.findTodos({filter}).then(function onSuccess(res) {
+        res.should.have.property('status', 200);
+        done();
+      }, /* on error */ done);
+    });
+
     it('allows models to be attached before the spec is loaded', async () => {
       const ds = await createDataSource('test/fixtures/3.0/ping.json');
       const Ping = ds.createModel('Ping', {});
