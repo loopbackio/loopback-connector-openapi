@@ -1,3 +1,13 @@
+2020-04-15, Version 4.1.0
+=========================
+
+ * feat: support `x-operation-name` and expose `apis.<tag>.<method>` (#10) (Raymond Feng)
+
+ * update README with LB4 usage (#8) (Diana Lau)
+
+ * Fix CI failures (#9) (Raymond Feng)
+
+
 2020-03-27, Version 4.0.2
 =========================
 

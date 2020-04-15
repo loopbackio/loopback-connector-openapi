@@ -1,6 +1,6 @@
 {
   "name": "loopback-connector-openapi",
-  "version": "4.0.2",
+  "version": "4.1.0",
   "description": "Connect Loopback to a OpenAPI-compliant APIs",
   "engines": {
     "node": ">=10"
