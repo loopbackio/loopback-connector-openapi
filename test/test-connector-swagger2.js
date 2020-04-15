@@ -62,34 +62,32 @@ describe('OpenAPI connector for Swagger 2.0', function() {
   });
 
   describe('models', function() {
-    describe('models without remotingEnabled', function() {
-      let ds, PetService, petId;
-      before(async () => {
-        ds = await createDataSource('test/fixtures/2.0/petstore.json');
-        PetService = ds.createModel('PetService', {});
-        const data = await PetService.findPetsByStatus({status: 'available'});
-        should(data.body).be.Array();
-        should(data.body.length).be.above(0);
-        petId = data.body[0].id;
-      });
+    let ds, PetService, petId;
+    before('connect to pet store', async () => {
+      ds = await createDataSource('test/fixtures/2.0/petstore.json');
+      PetService = ds.createModel('PetService', {});
+      const data = await PetService.findPetsByStatus({status: 'available'});
+      should(data.body).be.Array();
+      should(data.body.length).be.above(0);
+      petId = data.body[data.body.length - 1].id;
+    });
 
-      it('creates models', () => {
-        (typeof PetService.getPetById).should.eql('function');
-        (typeof PetService.addPet).should.eql('function');
-      });
+    it('creates models', () => {
+      (typeof PetService.getPetById).should.eql('function');
+      (typeof PetService.addPet).should.eql('function');
+    });
 
-      it('supports model methods with callback', done => {
-        PetService.getPetById({petId}, function(err, res) {
-          if (err) return done(err);
-          res.status.should.eql(200);
-          done();
-        });
+    it('supports model methods with callback', (done) => {
+      PetService.getPetById({petId}, function(err, res) {
+        if (err) return done(err);
+        res.status.should.eql(200);
+        done();
       });
+    });
 
-      it('supports model methods returning a Promise', async () => {
-        const res = await PetService.getPetById({petId});
-        res.should.have.property('status', 200);
-      });
+    it('supports model methods returning a Promise', async () => {
+      const res = await PetService.getPetById({petId});
+      res.should.have.property('status', 200);
     });
 
     it('allows models to be attached before the spec is loaded', async () => {
@@ -102,10 +100,9 @@ describe('OpenAPI connector for Swagger 2.0', function() {
   });
 
   describe('Swagger invocations', function() {
-    let ds, PetService;
-    let petId = 1;
+    let ds, PetService, petId;
 
-    before(async () => {
+    before('connect to pet store', async () => {
       ds = await createDataSource('test/fixtures/2.0/petstore.json');
       PetService = ds.createModel('PetService', {});
 
@@ -113,7 +110,7 @@ describe('OpenAPI connector for Swagger 2.0', function() {
       const data = await PetService.findPetsByStatus({status: 'available'});
       should(data.body).be.Array();
       should(data.body.length).be.above(0);
-      petId = data.body[0].id;
+      petId = data.body[data.body.length - 1].id;
     });
 
     it('invokes the PetService', async () => {
@@ -131,7 +128,7 @@ describe('OpenAPI connector for Swagger 2.0', function() {
       res.headers['content-type'].should.eql('application/xml');
     });
 
-    it('invokes connector-hooks', done => {
+    it('invokes connector-hooks', (done) => {
       const events = [];
       const connector = ds.connector;
       connector.observe('before execute', function(ctx, next) {
@@ -150,16 +147,16 @@ describe('OpenAPI connector for Swagger 2.0', function() {
       });
     });
 
-    it('supports Promise-based connector-hooks', done => {
+    it('supports Promise-based connector-hooks', (done) => {
       const events = [];
       const connector = ds.connector;
 
-      connector.observe('before execute', ctx => {
+      connector.observe('before execute', (ctx) => {
         events.push('before execute');
         return Promise.resolve();
       });
 
-      connector.observe('after execute', ctx => {
+      connector.observe('after execute', (ctx) => {
         events.push('after execute');
         return Promise.resolve();
       });
