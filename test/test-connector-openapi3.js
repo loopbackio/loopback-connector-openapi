@@ -139,10 +139,14 @@ describe('swagger connector for OpenApi 3.0', () => {
       it('supports positional invocation', async () => {
         const ds = await createDataSource(specUrl, {positional: true});
         const Todo = ds.createModel('Todo', {}, {base: 'Model'});
-        const res = await Todo.TodoController_createTodo({
+        let res = await Todo.TodoController_createTodo({
           title: 'My todo 2',
         });
 
+        res.status.should.eql(200);
+        res.body.should.eql({id: 2, title: 'My todo 2'});
+
+        res = await Todo.TodoController_findTodoById(2, {});
         res.status.should.eql(200);
         res.body.should.eql({id: 2, title: 'My todo 2'});
       });
