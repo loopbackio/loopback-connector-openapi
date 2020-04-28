@@ -1,4 +1,10 @@
-2020-04-15, Version 4.1.0
+2020-04-28, Version 4.2.0
+=========================
+
+ * fix: update openapi connector to fix positional parameter processing (#11) (Raymond Feng)
+
+
+2020-04-14, Version 4.1.0
 =========================
 
  * feat: support `x-operation-name` and expose `apis.<tag>.<method>` (#10) (Raymond Feng)
