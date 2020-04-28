@@ -1,4 +1,10 @@
-2020-04-28, Version 4.2.0
+2020-04-28, Version 4.3.0
+=========================
+
+ * Add ability to map methods and transform responses (#12) (Raymond Feng)
+
+
+2020-04-27, Version 4.2.0
 =========================
 
  * fix: update openapi connector to fix positional parameter processing (#11) (Raymond Feng)
