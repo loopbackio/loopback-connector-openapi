@@ -80,9 +80,10 @@ describe('swagger connector for OpenApi 3.0', () => {
       Todo = ds.createModel('Todo', {}, {base: 'Model'});
     });
 
-    it('creates models', function(done) {
+    it('creates models', function() {
       (typeof Todo.TodoController_findTodos).should.eql('function');
-      done();
+      (typeof Todo.todoControllerFindTodos).should.eql('function');
+      (typeof Todo.apis.TodoController.findTodos).should.eql('function');
     });
 
     it('supports model methods', function(done) {
@@ -119,6 +120,19 @@ describe('swagger connector for OpenApi 3.0', () => {
       const Ping = ds.createModel('Ping', {});
       should(Object.keys(Ping)).containEql('get_ping');
       should(typeof Ping.get_ping).eql('function');
+    });
+
+    it('uses custom mapToMethods', async () => {
+      const mapToMethods = (tag, opSpec) => {
+        if (tag) {
+          return `${tag}$${opSpec['x-operation-name']}`;
+        }
+        return '$' + opSpec['x-operation-name'];
+      };
+      const ds1 = await createDataSource(specUrl, {mapToMethods: mapToMethods});
+      const Todo1 = ds1.createModel('Todo', {}, {base: 'Model'});
+      should(Object.keys(Todo1)).containEql('TodoController$findTodos');
+      should(Object.keys(Todo1.apis.TodoController)).containEql('$findTodos');
     });
 
     describe('Swagger invocations', () => {
@@ -193,6 +207,30 @@ describe('swagger connector for OpenApi 3.0', () => {
 
         await Todo.TodoController_findTodos({filter});
         assert.deepEqual(events, ['before execute', 'after execute']);
+      });
+
+      it('uses custom transformResponse', async () => {
+        const transformResponse = (res) => {
+          if (res.status < 400) return res.body;
+          throw new Error(`${res.status} ${res.statusText}`);
+        };
+        const ds1 = await createDataSource(specUrl, {transformResponse: transformResponse});
+        const Todo1 = ds1.createModel('Todo', {}, {base: 'Model'});
+        const res = await Todo1.apis.TodoController.findTodos({filter});
+        res.should.eql([
+          {id: 1, title: 'My todo'},
+          {id: 2, title: 'My todo 2'},
+        ]);
+      });
+
+      it('uses default transformResponse', async () => {
+        const ds1 = await createDataSource(specUrl, {transformResponse: true});
+        const Todo1 = ds1.createModel('Todo', {}, {base: 'Model'});
+        const res = await Todo1.apis.TodoController.findTodos({filter});
+        res.should.eql([
+          {id: 1, title: 'My todo'},
+          {id: 2, title: 'My todo 2'},
+        ]);
       });
     });
   });
