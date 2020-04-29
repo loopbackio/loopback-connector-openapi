@@ -169,6 +169,36 @@ describe('OpenAPI connector for Swagger 2.0', function() {
   });
 });
 
+describe('options for openapi connector', () => {
+  let ds, PetService;
+
+  before(async () => {
+    ds = await createDataSource('test/fixtures/2.0/petstore.yaml', {
+      forceOpenApi30: true,
+      transformResponse: true,
+      positional: true,
+    });
+    PetService = ds.createModel('PetService', {});
+  });
+
+  it('supports forceOpenApi30', async () => {
+    const pet = await PetService.addPet({
+      category: {id: 0},
+      name: 'dog9375',
+      photoUrls: [],
+      tags: [],
+      status: 'available',
+    });
+    assert(pet.id);
+  });
+
+  it('supports positional & transformResponse', async () => {
+    // https://petstore.swagger.io/v2/pet/findByStatus?status=available
+    const data = await PetService.findPetsByStatus('available');
+    assert(data.length > 0);
+  });
+});
+
 async function createDataSource(spec, options) {
   const config = Object.assign(
     {
