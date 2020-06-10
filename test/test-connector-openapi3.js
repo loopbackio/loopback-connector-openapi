@@ -165,6 +165,15 @@ describe('swagger connector for OpenApi 3.0', () => {
         res.body.should.eql({id: 2, title: 'My todo 2'});
       });
 
+      it('supports positional invocation with options', async () => {
+        const ds = await createDataSource(specUrl, {positional: true});
+        const Todo = ds.createModel('Todo', {}, {base: 'Model'});
+        const create = Todo.TodoController_createTodo({
+          title: 'My todo 2',
+        }, {requestContentType: 'application/xml'});
+        return should(create).rejectedWith(/Unprocessable Entity/);
+      });
+
       it('invokes the findTodos', async () => {
         const res = await Todo.TodoController_findTodos({filter});
         res.status.should.eql(200);
