@@ -1,4 +1,10 @@
-2020-04-29, Version 6.0.0
+2020-06-11, Version 6.1.0
+=========================
+
+ * feat: allow extra options for operations (#14) (Raymond Feng)
+
+
+2020-04-28, Version 6.0.0
 =========================
 
  * Allow 2.0 methods to positional with body as last arg (#13) (Raymond Feng)
