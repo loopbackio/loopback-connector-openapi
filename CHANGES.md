@@ -1,4 +1,12 @@
-2020-06-11, Version 6.1.0
+2020-10-10, Version 6.2.0
+=========================
+
+ * feat: add options for http client (Raymond Feng)
+
+ * chore: switch to DCO (#15) (Diana Lau)
+
+
+2020-06-10, Version 6.1.0
 =========================
 
  * feat: allow extra options for operations (#14) (Raymond Feng)
