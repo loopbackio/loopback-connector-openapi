@@ -68,7 +68,8 @@ describe('OpenAPI connector for Swagger 2.0', function() {
     before('connect to pet store', async () => {
       ds = await createDataSource('test/fixtures/2.0/petstore.json');
       PetService = ds.createModel('PetService', {});
-      const data = await PetService.findPetsByStatus({status: 'available'});
+      const data = await PetService.findPetsByStatus({status: 'available'},
+        {responseContentType: 'application/json'});
       should(data.body).be.Array();
       should(data.body.length).be.above(0);
       petId = data.body[data.body.length - 1].id;
@@ -109,7 +110,8 @@ describe('OpenAPI connector for Swagger 2.0', function() {
       PetService = ds.createModel('PetService', {});
 
       // https://petstore.swagger.io/v2/pet/findByStatus?status=available
-      const data = await PetService.findPetsByStatus({status: 'available'});
+      const data = await PetService.findPetsByStatus({status: 'available'},
+        {responseContentType: 'application/json'});
       should(data.body).be.Array();
       should(data.body.length).be.above(0);
       petId = data.body[data.body.length - 1].id;

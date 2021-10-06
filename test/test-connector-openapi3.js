@@ -81,13 +81,13 @@ describe('swagger connector for OpenApi 3.0', () => {
     });
 
     it('creates models', function() {
-      (typeof Todo.TodoController_findTodos).should.eql('function');
-      (typeof Todo.todoControllerFindTodos).should.eql('function');
-      (typeof Todo.apis.TodoController.findTodos).should.eql('function');
+      (typeof Todo.TodoController_find).should.eql('function');
+      (typeof Todo.todoControllerFind).should.eql('function');
+      (typeof Todo.apis.TodoController.find).should.eql('function');
     });
 
     it('supports model methods', function(done) {
-      Todo.TodoController_findTodos({filter}, function(err, res) {
+      Todo.TodoController_find({filter}, function(err, res) {
         if (err) return done(err);
         res.status.should.eql(200);
         done();
@@ -95,21 +95,21 @@ describe('swagger connector for OpenApi 3.0', () => {
     });
 
     it('supports model methods returning a Promise', done => {
-      Todo.TodoController_findTodos({filter}).then(function onSuccess(res) {
+      Todo.TodoController_find({filter}).then(function onSuccess(res) {
         res.should.have.property('status', 200);
         done();
       }, /* on error */ done);
     });
 
     it('supports model methods by x-operation-name', done => {
-      Todo.findTodos({filter}).then(function onSuccess(res) {
+      Todo.find({filter}).then(function onSuccess(res) {
         res.should.have.property('status', 200);
         done();
       }, /* on error */ done);
     });
 
     it('exports apis by tag', done => {
-      Todo.apis.TodoController.findTodos({filter}).then(function onSuccess(res) {
+      Todo.apis.TodoController.find({filter}).then(function onSuccess(res) {
         res.should.have.property('status', 200);
         done();
       }, /* on error */ done);
@@ -131,13 +131,13 @@ describe('swagger connector for OpenApi 3.0', () => {
       };
       const ds1 = await createDataSource(specUrl, {mapToMethods: mapToMethods});
       const Todo1 = ds1.createModel('Todo', {}, {base: 'Model'});
-      should(Object.keys(Todo1)).containEql('TodoController$findTodos');
-      should(Object.keys(Todo1.apis.TodoController)).containEql('$findTodos');
+      should(Object.keys(Todo1)).containEql('TodoController$find');
+      should(Object.keys(Todo1.apis.TodoController)).containEql('$find');
     });
 
     describe('Swagger invocations', () => {
       it('invokes the createTodo', async () => {
-        const res = await Todo.TodoController_createTodo(
+        const res = await Todo.TodoController_create(
           {},
           {
             requestBody: {
@@ -153,14 +153,14 @@ describe('swagger connector for OpenApi 3.0', () => {
       it('supports positional invocation', async () => {
         const ds = await createDataSource(specUrl, {positional: true});
         const Todo = ds.createModel('Todo', {}, {base: 'Model'});
-        let res = await Todo.TodoController_createTodo({
+        let res = await Todo.TodoController_create({
           title: 'My todo 2',
         });
 
         res.status.should.eql(200);
         res.body.should.eql({id: 2, title: 'My todo 2'});
 
-        res = await Todo.TodoController_findTodoById(2, {});
+        res = await Todo.TodoController_findById(2, {});
         res.status.should.eql(200);
         res.body.should.eql({id: 2, title: 'My todo 2'});
       });
@@ -168,14 +168,14 @@ describe('swagger connector for OpenApi 3.0', () => {
       it('supports positional invocation with options', async () => {
         const ds = await createDataSource(specUrl, {positional: true});
         const Todo = ds.createModel('Todo', {}, {base: 'Model'});
-        const create = Todo.TodoController_createTodo({
+        const create = Todo.TodoController_create({
           title: 'My todo 2',
         }, {requestContentType: 'application/xml'});
         return should(create).rejectedWith(/Unprocessable Entity/);
       });
 
       it('invokes the findTodos', async () => {
-        const res = await Todo.TodoController_findTodos({filter});
+        const res = await Todo.TodoController_find({filter});
         res.status.should.eql(200);
         res.body.should.eql([
           {id: 1, title: 'My todo'},
@@ -196,7 +196,7 @@ describe('swagger connector for OpenApi 3.0', () => {
           events.push('after execute');
           next();
         });
-        await Todo.TodoController_findTodos({filter});
+        await Todo.TodoController_find({filter});
         assert.deepEqual(events, ['before execute', 'after execute']);
       });
 
@@ -214,7 +214,7 @@ describe('swagger connector for OpenApi 3.0', () => {
           return Promise.resolve();
         });
 
-        await Todo.TodoController_findTodos({filter});
+        await Todo.TodoController_find({filter});
         assert.deepEqual(events, ['before execute', 'after execute']);
       });
 
@@ -225,7 +225,7 @@ describe('swagger connector for OpenApi 3.0', () => {
         };
         const ds1 = await createDataSource(specUrl, {transformResponse: transformResponse});
         const Todo1 = ds1.createModel('Todo', {}, {base: 'Model'});
-        const res = await Todo1.apis.TodoController.findTodos({filter});
+        const res = await Todo1.apis.TodoController.find({filter});
         res.should.eql([
           {id: 1, title: 'My todo'},
           {id: 2, title: 'My todo 2'},
@@ -235,7 +235,7 @@ describe('swagger connector for OpenApi 3.0', () => {
       it('uses default transformResponse', async () => {
         const ds1 = await createDataSource(specUrl, {transformResponse: true});
         const Todo1 = ds1.createModel('Todo', {}, {base: 'Model'});
-        const res = await Todo1.apis.TodoController.findTodos({filter});
+        const res = await Todo1.apis.TodoController.find({filter});
         res.should.eql([
           {id: 1, title: 'My todo'},
           {id: 2, title: 'My todo 2'},
