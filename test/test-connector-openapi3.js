@@ -12,6 +12,7 @@ const pEvent = require('p-event');
 
 describe('swagger connector for OpenApi 3.0', () => {
   let lb4App;
+  const specUrlWithoutServersField = 'https://restcountries.com/openapi/rest-countries-3.1.yml';
   let specUrl = 'http://127.0.0.1:3000/openapi.json';
 
   before(startLB4App);
@@ -33,6 +34,13 @@ describe('swagger connector for OpenApi 3.0', () => {
   });
 
   describe('openapi client generation', () => {
+    it('generates client from openapi spec url when specs doesnot have servers field', async () => {
+      const ds = await createDataSource(specUrlWithoutServersField);
+      ds.connector.should.have.property('client');
+      ds.connector.client.should.have.property('apis');
+      ds.connector.api.should.have.property('servers');
+    });
+
     it('generates client from openapi spec url', async () => {
       const ds = await createDataSource(specUrl);
       ds.connector.should.have.property('client');
